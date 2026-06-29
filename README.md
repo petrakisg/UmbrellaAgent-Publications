@@ -1,8 +1,8 @@
 # UmbrellaAgent Publications
 
-This repository contains the academic publications and documentation produced from the **UmbrellaAgent** research project, developed at the University of Ioannina. 
+This repository contains the academic publications (Bachelor's Thesis and IEEE conference paper) surrounding **UmbrellaAgent**, an independently developed Order Management System. While the software itself is an independent creation by George Petrakis, the academic research and documentation contained in this repository were conducted and published in collaboration with the Department of Informatics and Telecommunications at the University of Ioannina.
 
-The project investigates the viability of a **Local-First, Event-Driven Order Management System** using WebSockets and the MERN stack for temporary, connectivity-constrained event environments.
+UmbrellaAgent investigates the viability of a **Local-First, Event-Driven Order Management System** using WebSockets and the MERN stack for temporary, connectivity-constrained event environments.
 
 > **Note:** This repository is dedicated to the dissemination of our research findings. It does **not** contain the proprietary application source code. It includes the LaTeX source codes, compiled documents, high-resolution figures, and related presentations.
 
