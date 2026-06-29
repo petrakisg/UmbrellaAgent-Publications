@@ -1,0 +1,238 @@
+% !TEX program = xelatex
+%
+% Περάστε στο πακέτο dituoi-thesis τις κατάλληλες επιλογές για τη διατριβή σας
+%
+\PassOptionsToPackage{hidelinks}{hyperref}
+\documentclass[en,msc]{dituoi-thesis} % Χρησιμοποιούμε msc ως βάση αλλά θα αλλάξουμε τους τίτλους
+
+% Custom overrides for Bachelor Thesis (ΠΤΥΧΙΑΚΗ ΕΡΓΑΣΙΑ)
+\renewcommand{\ditthesisTypeGr}{ΠΤΥΧΙΑΚΗ ΕΡΓΑΣΙΑ}
+\renewcommand{\ditdiplwmaGr}{ΠΤΥΧΙΟΥ ΠΛΗΡΟΦΟΡΙΚΗΣ ΚΑΙ ΤΗΛΕΠΙΚΟΙΝΙΩΝ}
+\renewcommand{\ditthesisTypeEn}{Bachelor Thesis}
+\renewcommand{\ditdiplwmaEn}{B.Sc. in Informatics and Telecommunications}
+
+% Επιλογές για την εμφάνιση
+\usepackage{float} % Για το [H] στα σχήματα αν χρειαστεί
+\usepackage{graphicx} % Required for \includegraphics
+\graphicspath{{Content/}}
+\usepackage{xurl} % Better URL breaking
+\usepackage{booktabs} % For professional looking tables
+\usepackage{multicol} % For multi-column abbreviations list
+\usepackage{microtype} % Advanced typography to fix margin overflows
+
+% Some thesis templates don't define these environments; provide fallbacks.
+\makeatletter
+\@ifundefined{abstract}{%
+  \newenvironment{abstract}{\begin{quotation}\noindent}{\end{quotation}}%
+}{}
+\@ifundefined{abstractGr}{%
+  \newenvironment{abstractGr}{\begin{quotation}\noindent}{\end{quotation}}%
+}{}
+\@ifundefined{acknowledgements}{%
+  \newenvironment{acknowledgements}{\chapter*{Acknowledgements}\begin{quotation}\noindent}{\end{quotation}}%
+}{}
+\makeatother
+
+%
+% Συμπληρώστε τα στοιχεία σας στις παρακάτω εντολές
+%
+\titleGr{ΣΧΕΔΙΑΣΗ ΚΑΙ ΥΛΟΠΟΙΗΣΗ ΕΦΑΡΜΟΓΗΣ ΔΙΑΧΕΙΡΙΣΗΣ ΠΑΡΑΓΓΕΛΙΩΝ ΥΨΗΛΟΥ ΡΥΘΜΟΥ ΓΙΑ ΕΚΔΗΛΩΣΕΙΣ ΜΕ ΜΕΓΑΛΟ ΠΛΗΘΟΣ ΣΥΜΜΕΤΕΧΟΝΤΩΝ}
+\titleEn{DESIGN AND IMPLEMENTATION OF A HIGH-THROUGHPUT ORDER MANAGEMENT APPLICATION FOR LARGE-SCALE EVENTS}
+\authorGr{Πετράκης Γεώργιος}
+\authorEn{Petrakis Georgios}
+\arthro{τον}
+\aitiatiki{Πετράκη Γεώργιο}
+\dateGr{Ιούλιος 2026}
+\dateEn{June 2026}
+\advisorGr{Μαργαρίτη Σπυριδούλα, Εργαστηριακό Διδακτικό Προσωπικό (Ε.ΔΙ.Π.)}
+\advisorEn{Margariti Spyridoula, Laboratory Teaching Staff}
+
+% Custom override for the Title Pages to match the image provided
+\makeatletter
+\renewcommand{\maketitle}{%
+  \hypersetup{%
+    pdftitle={\@titleEn},%
+    pdfauthor={\@authorEn},%
+    pdfsubject={\ditthesisTypeEn},%
+    pdfborder={0 0 0.5},%
+    linkbordercolor={0.9 0.9 0.9},%
+    citebordercolor={0.9 0.9 0.9},%
+    urlbordercolor={0.9 0.9 0.9}%
+  }%
+  \makeenglishtitle%
+  \makegreektitle%
+}%
+
+\renewcommand{\makegreektitle}{
+  \vspace*{3cm}
+  \begin{center}
+    \textbf{\Large \MakeUppercase{\@titleGr}}
+  \end{center}
+  \clearpage
+}
+
+\renewcommand{\makeenglishtitle}{%
+  \begin{center}
+    \includegraphics[width=8cm]{Content/logo_uoi_en.png} \\[\baselineskip]
+    
+    {\Large UNIVERSITY OF IOANNINA} \\[0.5em]
+    {\Large DEPARTMENT OF INFORMATICS AND TELECOMMUNICATIONS} \\[3em]
+
+    \textbf{\LARGE \ditthesisTypeEn} \\[2em]
+
+    \textbf{\LARGE \@titleEn} \\[2em]
+
+    {\Large \@authorEn} \\[4em]
+  \end{center}
+
+  \begin{center}
+    \large
+    Supervisor: Margariti Spyridoula, Laboratory Teaching Staff \\
+    Gogos Christos, Professor
+  \end{center}
+  \vfill
+  \begin{center}
+    \large Arta, June 2026
+  \end{center}
+  \clearpage
+}%
+\makeatother
+
+%
+% Για Διδακτορικό συμπληρώστε τις επιτροπές σας (αγνοούνται στο ΜΔΕ/Πτυχιακή)
+%
+\MSCexaminer{Μαργαρίτη Σπυριδούλα}{Ε.ΔΙ.Π.}%
+{Τμήμα Πληροφορικής και Τηλεπικοινωνιών, Πανεπιστήμιο Ιωαννίνων (Επιβλέπουσα)}
+\MSCexaminer{Γκόγκος Χρήστος}{Καθηγητής}%
+{Τμήμα Πληροφορικής και Τηλεπικοινωνιών, Πανεπιστήμιο Ιωαννίνων}
+% Προσθέστε τρίτο μέλος αν υπάρχει
+%\MSCexaminer{Όνομα Επίθετο}{Βαθμίδα}%
+%    {Τμήμα...}
+
+% Πακέτο για την εμφάνιση περιθωρίων (χρήσιμο για την εύρεση overfull boxes)
+%\usepackage{showframe}
+
+% Πακέτο για τη διατήρηση των floats (εικόνες κ.α.) εντός των ενοτήτων
+%\usepackage[section]{placeins}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break, const, let, async, await, try, export, import, from, default},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{codegreen}\ttfamily,
+  stringstyle=\color{codepurple}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\begin{document}
+
+% Σελίδες χωρίς αρίθμηση
+\pagenumbering{gobble}
+
+% Εκτύπωση της σελίδας τίτλου
+\maketitle
+
+\include{FrontMatter/OfficialDocs}
+
+% Εκτύπωση της σελίδας με τις επιτροπές (Προαιρετικό για πτυχιακή, αν δεν το θέλετε σχολιάστε το)
+%\makecommittees
+
+% Αρχικοποίηση του minitoc
+\dominitoc[n]
+
+%\include{FrontMatter/Dedication} % Προαιρετικό
+\include{FrontMatter/Acknowledgements} % Προαιρετικό
+
+% Συνεχής αρίθμηση (Arabic) από την αρχή
+\pagenumbering{arabic}
+
+% Περιεχόμενα
+\pdfbookmark{\contentsname}{contents} % hyperref
+\tableofcontents
+
+% Κατάλογος Σχημάτων
+\addstarredchapterc{\listfigurename} % minitoc
+\listoffigures
+
+% Κατάλογος Πινάκων
+\addstarredchapterc{\listtablename} % minitoc
+\listoftables
+
+% Κατάλογος Αλγορίθμων
+\addstarredchapterc{\listalgorithmname} % minitoc
+%\listof{algorithm}{\listalgorithmname}
+
+\include{FrontMatter/Glossary}
+
+% Περίληψη και εκτεταμένη περίληψη
+\include{FrontMatter/Abstract}
+\include{FrontMatter/ExtendedAbstract}
+
+% Συνεχίζουμε την αρίθμηση χωρίς επαναφορά
+%\pagenumbering{arabic}
+
+% Εισαγωγή των κεφαλαίων
+\include{Content/Chapter1}
+\include{Content/Chapter2}
+\include{Content/Chapter3}
+\include{Content/Chapter4}
+\include{Content/Chapter5}
+\include{Content/Chapter6}
+
+% Εισαγωγή της βιβλιογραφίας
+\renewcommand{\bibname}{Bibliography}
+\addstarredchapterc{\bibname} % minitoc
+\nocite{*} % show bibliography even if you have no \cite commands yet
+\bibliographystyle{IEEEtran}
+\bibliography{Content/Bibliography}
+
+% Προαιρετικά, μπορείτε να εισάγετε παραρτήματα
+\appendix
+\include{Content/AppendixA}
+
+% Εκτύπωση του ευρετηρίου (προαιρετικό)
+%\printindex
+
+% Σελίδες χωρίς αρίθμηση
+%\pagenumbering{gobble}
+
+%\include{BackMatter/AuthorsPublications} % Προαιρετικό
+
+% Σύντομο Βιογραφικό
+%\include{BackMatter/ShortBiography}
+
+\end{document}

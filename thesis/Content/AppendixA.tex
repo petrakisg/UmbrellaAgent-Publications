@@ -1,0 +1,370 @@
+\chapter{Source Code Snippets}
+\label{app:code_snippets}
+
+The following sections provide representative source code snippets extracted from the operational system. These modules illustrate the practical implementation of the theoretical architectures discussed in Chapter 4, specifically focusing on real-time websocket synchronization, state management, and data concurrency.
+
+\section{Real-Time Authentication and Room Segmentation}
+\label{sec:code_socket_auth}
+
+The code below is an example of a Node.js server-side application that shows how a central event handling method can be called when connecting via socket.io. In addition to showing how the express-style middleware in the web-socket pipeline allows us to extract a JWT from the client's request before allowing them to connect, it also shows how we can apply a Zero Trust model for segmentation. This is by forcing each user to join only those Rooms they have been assigned authorization based on their role.
+
+\begin{lstlisting}[language=JavaScript, caption=Backend WebSocket Authorization and Connection Handler (server/src/socket.js), label=lst:socket_auth]
+const setupSocketHandlers = (io) => {
+  ioInstance = io;
+  
+  // Socket middleware for authentication
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      console.warn(`[Socket.io] Connection rejected: Token missing`);
+      return next(new Error('Authentication error: Token missing'));
+    }
+
+    // Verify token and attach user to socket
+    try {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.user = decoded;
+      next();
+    } catch (error) {
+      return next(new Error('Authentication error: Invalid token'));
+    }
+  });
+
+  io.on('connection', (socket) => {
+    console.log('New client connected:', socket.user.userId);
+
+    // THESIS IMPLEMENTATION: Zero Trust Strategy (Micro-Segmentation)
+    // Secure 'join-room' handler ignores client-provided 'role' and uses JWT
+    socket.on('join-room', ({ userId }) => {
+      if (!socket.user || !socket.user.role) return;
+
+      const authRole = socket.user.role;
+      const authUserId = socket.user.userId;
+
+      // Define Allowed Geographies (Room Whitelist)
+      const ROOM_ACCESS = {
+        'admin': ['admin', 'manager', 'cook', 'waiter', 'cashier'],
+        'manager': ['manager', 'cook', 'waiter', 'cashier'],
+        'cook': ['cook', 'kitchen'],
+        'waiter': ['waiter'],
+        'cashier': ['cashier']
+      };
+
+      const allowedRooms = ROOM_ACCESS[authRole] || [];
+      allowedRooms.forEach(room => socket.join(room));
+
+      // Personal Channel (Strictly matching JWT ID)
+      socket.join(authUserId);
+    });
+  });
+};
+\end{lstlisting}
+
+\newpage
+\section{Unidirectional Client State Management}
+\label{sec:code_zustand}
+
+The client-side implementation uses Zustand for its unidirectional, predictable State container which does not have the same limitations as the traditional React Context Providers. This example snippet is an illustration of the Authentication Store, it shows how the client communicates with the RESTful API to obtain a Bearer Token and subsequently changes the Global Reactive State. As long as the application does not cause a Cascading Browser Reflow (which could happen if we were using a DOM based approach), this will occur seamlessly in the background.
+
+\begin{lstlisting}[language=JavaScript, caption=Frontend Zustand Authentication Store (client/src/stores/authStore.js), label=lst:zustand_auth]
+import { create } from 'zustand';
+import axios from 'axios';
+
+const API_URL = '/api';
+
+// Authentication store as described in the architecture documentation
+export const useAuthStore = create((set) => ({
+  user: null,
+  token: localStorage.getItem('token'),
+  isAuthenticated: !!localStorage.getItem('token'),
+  loading: false,
+
+  login: async (username, password) => {
+    set({ loading: true });
+    try {
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        username,
+        password
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 10000
+      });
+      
+      const { token, user } = response.data;
+      if (!token) throw new Error('No token received');
+      
+      // Store token in localStorage for persistence
+      localStorage.setItem('token', token);
+      
+      // Set default Authorization header for all future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Mutate global application state without Context re-renders
+      set({ 
+        token,
+        user,
+        isAuthenticated: true,
+        loading: false
+      });
+      
+      return { success: true, user };
+    } catch (error) {
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
+      set({ user: null, token: null, isAuthenticated: false, loading: false });
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Authentication failed'
+      };
+    }
+  }
+}));
+\end{lstlisting}
+
+\newpage
+\section{Atomic Order Processing and Concurrency Control}
+\label{sec:code_order_processing}
+
+This is an example of using the Event Driven architecture (Event Driven) in handling high levels of concurrency with regards to transactional orders. In this design, incoming events from the network are pushed into an asynchronous queue where they will be processed sequentially. This allows for an atomic check of available inventory prior to removing it and sending it off to be printed on multiple stations by thermal printers while also sending out a broadcast notification via WebSocket that can then notify all connected kitchen devices.
+
+\begin{lstlisting}[language=JavaScript, caption=Backend Atomic Order Processor (server/src/socket.js), label=lst:process_order]
+const orderQueue = [];
+let isProcessingOrderQueue = false;
+
+// Process an order with strict stock checks and atomic operations
+const processOrder = async (orderData, creator, callback) => {
+  // Concurrency Gate: Enforce memory-based FIFO Queue
+  if (isProcessingOrderQueue) {
+    orderQueue.push({ orderData, creator, callback, queuedAt: new Date() });
+    return;
+  }
+  
+  isProcessingOrderQueue = true;
+  const checkedItems = [];
+
+  try {
+    // 1. Preliminary Stock Validation
+    const stockCheck = await checkStockAvailability(orderData.items);
+    if (!stockCheck.success) throw new Error(stockCheck.error);
+
+    // 2. Atomic Stock Decrease (Rollback Array generated)
+    for (const item of orderData.items) {
+      const menuItem = await MenuItem.findById(item.menuItem);
+      if (menuItem) {
+        await updateInventoryStock(
+          ioInstance, menuItem, item.quantity, 
+          item.selectedCustomizations, item.removedIngredients, true
+        );
+        checkedItems.push({ menuItem: item.menuItem, quantity: item.quantity });
+      }
+    }
+
+    // 3. Sequential Sequence Generation (Thread-Safe)
+    const counter = await OrderCounter.findOneAndUpdate(
+      { date: datePrefix },
+      { $inc: { serial: 1 } },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+    const orderNumber = `${datePrefix}-${counter.serial.toString().padStart(4, '0')}`;
+
+    // 4. Persistence
+    const order = new Order({ ...orderData, orderNumber });
+    await order.save();
+    const populatedOrder = await order.populate('items.menuItem');
+
+    // 5. Hardware Interface: Multi-Station Printing (Asynchronous)
+    await printerEngine.printOrder(populatedOrder, 'receipt');
+
+    // 6. Real-Time Broadcast to Kitchen & Clients
+    if (ioInstance) {
+      ioInstance.to('cook').emit('order-created', populatedOrder);
+      ioInstance.emit('new-order', populatedOrder);
+    }
+
+    if (callback) callback({ success: true, order: populatedOrder });
+
+  } catch (error) {
+    // Transactional Rollback logic for physical stock
+    if (checkedItems.length > 0) {
+      for (const item of checkedItems) {
+        await MenuItem.findByIdAndUpdate(item.menuItem, { $inc: { stock: item.quantity } });
+      }
+    }
+    if (callback) callback({ success: false, error: error.message });
+  } finally {
+    // Process next item in the event loop queue
+    isProcessingOrderQueue = false;
+    processOrderQueue(); 
+  }
+};
+\end{lstlisting}
+
+\newpage
+\section{WebSocket Resilience and Auto-Reconnection}
+\label{sec:code_reconnection}
+
+The Client-Side Websocket Management Layer contains all of the Automated Recovery Mechanisms for Chaos Engineering (documented in Chapter 5, Section 5.4.4). This React Hook maintains an active Persistent Connection to the Server using configurable exponential Back-off parameters. It also provides Token Injection Authentication \& Role Based Room Segmentation on Reconnects as well as Mitigates Background Throttling caused by Apple's iOS via the Page Visibility API. With Infinite Attempts at reconnecting when the connect event occurs, it is designed so the Client can recover autonomously from Server Interruptions without User Intervention.
+
+\begin{lstlisting}[language=JavaScript, caption=Client WebSocket Resilience Provider (client/src/hooks/useSocket.jsx), label=lst:socket_reconnect]
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { io } from 'socket.io-client';
+import { useAuthStore } from '../stores/authStore';
+
+const SocketContext = createContext(null);
+export const useSocket = () => useContext(SocketContext);
+
+export const SocketProvider = ({ children }) => {
+  const [socket, setSocket] = useState(null);
+  const token = useAuthStore(state => state.token);
+  const user = useAuthStore(state => state.user);
+  const socketRef = useRef(null);
+
+  useEffect(() => {
+    // 1. If there's no token and a socket exists, disconnect it.
+    if (!token) {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+        setSocket(null);
+      }
+      return;
+    }
+
+    // 2. If there is a token but no socket, create and connect it.
+    if (token && !socketRef.current) {
+      let backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+      // Network access detection: auto-switch from localhost to origin
+      if (backendUrl.includes('localhost')
+          && window.location.hostname !== 'localhost') {
+        backendUrl = window.location.origin;
+      }
+
+      const newSocket = io(backendUrl, {
+        auth: { token },
+        transports: ['websocket'],
+        // THESIS: Resilience Configuration
+        reconnection: true,
+        reconnectionAttempts: Infinity,    // Never stop trying
+        reconnectionDelay: 1000,           // Initial backoff: 1 second
+        reconnectionDelayMax: 5000         // Maximum backoff cap: 5 seconds
+      });
+      socketRef.current = newSocket;
+      setSocket(newSocket);
+
+      newSocket.on('connect_error', (err) => {
+        console.error('[Socket] Connection Error:', err.message);
+      });
+
+      newSocket.on('disconnect', (reason) => {
+        console.log(`[Socket] Disconnected: ${reason}`);
+      });
+    }
+
+    const socketInstance = socketRef.current;
+
+    // 3. Automatic Room Re-Joining on Reconnection
+    const handleConnect = () => {
+      if (!socketInstance) return;
+      if (user && user.role) {
+        socketInstance.emit('join-room', {
+          role: user.role,
+          userId: user._id
+        });
+      }
+    };
+
+    if (socketInstance) {
+      socketInstance.on('connect', handleConnect);
+    }
+
+    // 4. iOS Background Throttling Mitigation (Page Visibility API)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        if (socketInstance && !socketInstance.connected) {
+          // Force immediate reconnection when app returns to foreground
+          socketInstance.connect();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      if (socketInstance) socketInstance.off('connect', handleConnect);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [token, user]);
+
+  return (
+    <SocketContext.Provider value={socket}>
+      {children}
+    </SocketContext.Provider>
+  );
+};
+\end{lstlisting}
+
+\newpage
+\section{Real-Time Connection Status Monitor}
+\label{sec:code_connection_status}
+
+This excerpt from the Shared Layout Module displays a real-time connection status for each user logged in as an authenticated user. The UI continuously measures latency through subscription to Socket.io level pong event while continually displaying the connection status as either ``online'', ``syncing'', ``slow'' (when latency exceeds 300 ms) or ``offline''. Together with native browser online/offline events, this visual display will immediately notify the staff when there is any loss of connectivity during peak usage.
+
+\begin{lstlisting}[language=JavaScript, caption=Connection Status Monitor (client/src/components/Layout.jsx -- excerpt), label=lst:connection_status]
+const RightStatusPill = ({ socket }) => {
+  const [isConnected, setIsConnected] = useState(true);
+  const [latency, setLatency] = useState(0);
+  const [isTraffic, setIsTraffic] = useState(false);
+  const trafficTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onConnect = () => { setIsConnected(true); setLatency(0); };
+    const onDisconnect = () => { setIsConnected(false); setLatency(9999); };
+
+    // Latency measurement via Socket.IO engine pong events
+    const onPong = (ms) => { setLatency(ms); };
+
+    // Traffic activity detection (any event = data flowing)
+    const onAnyEvent = () => {
+      setIsTraffic(true);
+      if (trafficTimeoutRef.current) clearTimeout(trafficTimeoutRef.current);
+      trafficTimeoutRef.current = setTimeout(() => setIsTraffic(false), 500);
+    };
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.io.engine.on('pong', onPong);  // Engine-level latency
+    if (socket.onAny) socket.onAny(onAnyEvent);  // Wildcard listener
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.io.engine.off('pong', onPong);
+      if (socket.offAny) socket.offAny(onAnyEvent);
+    };
+  }, [socket]);
+
+  // Network Online/Offline Fallback (Browser API)
+  useEffect(() => {
+    const handleOnline = () => setIsConnected(true);
+    const handleOffline = () => setIsConnected(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Dynamic Status Classification
+  let statusKey = 'status_online';
+  if (!isConnected) statusKey = 'status_offline';
+  else if (latency > 300) statusKey = 'status_weak';
+  else if (isTraffic) statusKey = 'status_sync';
+
+  // ... render status indicator with color-coded dot and label
+};
+\end{lstlisting}
