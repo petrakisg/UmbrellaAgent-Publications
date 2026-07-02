@@ -32,7 +32,7 @@ The following video demonstrates the complete real-time processing workflow of U
 
 ## 💻 The Interfaces: A Journey of an Order
 
-UmbrellaAgent features role-specific interfaces built on our custom **Eclipse UI** design system, ensuring fast, frictionless interactions during high-pressure scenarios. Here is how the system handles the lifecycle of an order:
+UmbrellaAgent features role-specific interfaces built on our custom **UI** design system, ensuring fast, frictionless interactions during high-pressure scenarios. Here is how the system handles the lifecycle of an order:
 
 ### 1. Order Entry (Point of Sale)
 The journey begins at the POS. Designed for extreme speed, this interface allows cashiers and waiters to punch in complex orders rapidly without waiting for server round-trips.
