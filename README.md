@@ -24,12 +24,11 @@ To solve the challenges of connectivity drop-outs and server overload, UmbrellaA
 
 The following video demonstrates the complete real-time processing workflow of UmbrellaAgent. Notice the sub-second latency from order creation at the POS to the ticket appearing on the Kitchen Display System (KDS), a direct result of our WebSocket architecture.
 
-*(Click to play the video demonstration)*
 
-<video src="videos/Umbrella-Agent.MP4" controls="controls" width="100%">
-</video>
 
-*If the video player above does not load, **[👉 click here to watch the video demonstration](./videos/Umbrella-Agent.MP4)***
+> ⚠️ **Note:** Due to the high quality and length of the demonstration (66 MB), GitHub's web player cannot stream this file directly.
+> 
+> **[📥 Click here to Download and Watch the Full Video Demonstration (MP4)](https://github.com/petrakisg/UmbrellaAgent-Publications/raw/main/videos/Umbrella-Agent.MP4)**
 
 ---
 
