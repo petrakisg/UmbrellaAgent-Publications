@@ -24,18 +24,15 @@ To solve the challenges of connectivity drop-outs and server overload, UmbrellaA
 
 The following video demonstrates the complete real-time processing workflow of UmbrellaAgent. Notice the sub-second latency from order creation at the POS to the ticket appearing on the Kitchen Display System (KDS), a direct result of our WebSocket architecture.
 
-*(Click to play the video demonstration)*
-
-<video src="videos/Umbrella-Agent.MP4" controls="controls" width="100%">
-</video>
-
-*If the video player above does not load, **[👉 click here to watch the video demonstration](./videos/Umbrella-Agent.MP4)***
+> ⚠️ **Note:** Due to the high quality and length of the demonstration (66 MB), GitHub's web player cannot stream this file directly.
+> 
+> **[📥 Click here to Download and Watch the Full Video Demonstration (MP4)](https://github.com/petrakisg/UmbrellaAgent-Publications/raw/main/videos/Umbrella-Agent.MP4)**
 
 ---
 
 ## 💻 The Interfaces: A Journey of an Order
 
-UmbrellaAgent features role-specific interfaces built on our custom **UI** design system, ensuring fast, frictionless interactions during high-pressure scenarios. Here is how the system handles the lifecycle of an order:
+UmbrellaAgent features role-specific interfaces built on our custom **Eclipse UI** design system, ensuring fast, frictionless interactions during high-pressure scenarios. Here is how the system handles the lifecycle of an order:
 
 ### 1. Order Entry (Point of Sale)
 The journey begins at the POS. Designed for extreme speed, this interface allows cashiers and waiters to punch in complex orders rapidly without waiting for server round-trips.
