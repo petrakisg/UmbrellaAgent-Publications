@@ -2,7 +2,7 @@
 
 Welcome to the presentation repository for **UmbrellaAgent**. 
 
-This repository serves as a visual and descriptive showcase of the application developed as the foundation for our academic research, published in the IEEE SEEDA 2026 conference under the title:  
+This repository serves as a visual and descriptive showcase of the application developed as the foundation for our academic research, currently submitted to the IEEE SEEDA 2026 conference under the title:  
 **"A Local-First Event-Driven Order Management System for Temporary Events"**.
 
 > **Note:** This repository is dedicated to presenting the application's interface, capabilities, and real-world execution. It does not contain the proprietary source code of the application itself.
