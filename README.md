@@ -40,33 +40,46 @@ UmbrellaAgent features role-specific interfaces built on our custom **Eclipse UI
 ### 1. Order Entry (Point of Sale)
 The journey begins at the POS. Designed for extreme speed, this interface allows cashiers and waiters to punch in complex orders rapidly without waiting for server round-trips.
 
-![Point of Sale Interface](./images/ui_cashier.png)
+<p align="center">
+  <img src="./images/ui_cashier.png" alt="Point of Sale Interface" width="85%">
+</p>
 
 ### 2. Order Preparation (Kitchen Display System)
 As soon as the order is confirmed, it instantly appears on the KDS. The kitchen staff receives real-time updates, ensuring zero delays in preparation.
 
-![Kitchen Display System](./images/ui_kitchen.png)
+<p align="center">
+  <img src="./images/ui_kitchen.png" alt="Kitchen Display System" width="85%">
+</p>
 
 ### 3. Management & Analytics (Admin Dashboard)
 Behind the scenes, managers use the Admin interface to track live analytics, monitor stock levels, and manage users, all synchronized in real-time.
 
-![Admin Dashboard](./images/ui_admin.png)
+<p align="center">
+  <img src="./images/ui_admin.png" alt="Admin Dashboard" width="85%">
+</p>
 
 ---
 
 ## 🌍 The Challenge & Real-World Validation
 
 ### The Environment: High-Density & High-Throughput
-UmbrellaAgent is built specifically to handle extreme transactional loads in crowded, fast-paced environments. The image below illustrates the immense volume of people and the high-throughput nature of the events our system targets.
+UmbrellaAgent is built specifically to handle extreme transactional loads in crowded, fast-paced environments. To understand the sheer volume of people we are designing for, consider the following reference image. 
+*(Note: This specific photograph from Almyros is purely to illustrate the massive scale and crowd density typical of such environments).*
 
-![High-Density Event Scale](./images/samolis%20almyros.jpg)
-*(Reference: Visualizing the massive scale and crowd density that demands a Local-First, high-throughput architecture).*
+<p align="center">
+  <img src="./images/samolis%20almyros.jpg" alt="High-Density Event Scale" width="85%">
+  <br>
+  <em>Reference: Visualizing the massive scale that demands a Local-First architecture.</em>
+</p>
 
 ### Live Field Testing
 To validate our research, UmbrellaAgent was deployed in live, real-world conditions. The photograph below captures the system in action during a live event—with the UmbrellaAgent interface actively running on the terminal in the foreground, while the party takes place in the background.
 
-![UmbrellaAgent Live Deployment](./images/PXL_20250713_231810722_Original.jpg)
-*(UmbrellaAgent operating seamlessly in the field without relying on external internet connectivity).*
+<p align="center">
+  <img src="./images/PXL_20250713_231810722_Original.jpg" alt="UmbrellaAgent Live Deployment" width="85%">
+  <br>
+  <em>UmbrellaAgent operating seamlessly in the field without relying on external internet connectivity.</em>
+</p>
 
 Our research and subsequent field testing validated several core architectural decisions:
 - **Performance & Scalability:** Through rigorous synthetic stress tests (via Apache JMeter), the WebSocket duplex stream architecture successfully sustained over **1.58M requests** without failure.
