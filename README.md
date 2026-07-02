@@ -11,7 +11,7 @@ This repository serves as a visual and descriptive showcase of the application d
 
 ## 📖 The Vision: Why UmbrellaAgent?
 
-UmbrellaAgent was designed specifically for high-density, temporary event environments—such as music festivals, beach bars, and pop-up events—where external internet connectivity is often unreliable, yet the volume of transactions is massive and concentrated.
+UmbrellaAgent was designed specifically for high-density, temporary event environments such as music festivals, beach bars, and pop-up events, where external internet connectivity is often unreliable, yet the volume of transactions is massive and concentrated.
 
 To solve the challenges of connectivity drop-outs and server overload, UmbrellaAgent replaces traditional HTTP request-response polling with a **Local-First** architecture utilizing bidirectional **WebSockets**. This allows for:
 - **Instantaneous UI Synchronization** across all devices (Point of Sale, Kitchen Display, Cashier).
@@ -26,9 +26,10 @@ The following video demonstrates the complete real-time processing workflow of U
 
 *(Click to play the video demonstration)*
 
-<video src="./videos/Umbrella-Agent.MP4" controls="controls" style="max-width: 100%; width: 100%;">
-  Your browser does not support the video tag. <a href="./videos/Umbrella-Agent.MP4">Download the video here</a>.
+<video src="videos/Umbrella-Agent.MP4" controls="controls" width="100%">
 </video>
+
+*If the video player above does not load, **[👉 click here to watch the video demonstration](./videos/Umbrella-Agent.MP4)***
 
 ---
 
@@ -47,7 +48,7 @@ As soon as the order is confirmed, it instantly appears on the KDS. The kitchen 
 ![Kitchen Display System](./images/ui_kitchen.png)
 
 ### 3. Management & Analytics (Admin Dashboard)
-Behind the scenes, managers use the Admin interface to track live analytics, monitor stock levels, and manage users—all synchronized in real-time.
+Behind the scenes, managers use the Admin interface to track live analytics, monitor stock levels, and manage users, all synchronized in real-time.
 
 ![Admin Dashboard](./images/ui_admin.png)
 
