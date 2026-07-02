@@ -53,17 +53,19 @@ Behind the scenes, managers use the Admin interface to track live analytics, mon
 
 ---
 
-## 🌍 Real-World Deployment & Field Testing
+## 🌍 The Challenge & Real-World Validation
 
-To validate our architectural decisions, UmbrellaAgent was deployed and tested in demanding, real-world conditions. 
+### The Environment: High-Density & High-Throughput
+UmbrellaAgent is built specifically to handle extreme transactional loads in crowded, fast-paced environments. The image below illustrates the immense volume of people and the high-throughput nature of the events our system targets.
 
-### High-Density Environment: Samolis, Almyros
-The system was tested at a high-traffic venue, validating our hypothesis regarding burst transactional loads and network resilience.
+![High-Density Event Scale](./images/samolis%20almyros.jpg)
+*(Reference: Visualizing the massive scale and crowd density that demands a Local-First, high-throughput architecture).*
 
-<div align="center">
-  <img src="./images/samolis%20almyros.jpg" alt="Samolis Almyros Venue" width="45%" style="margin-right: 20px;"/>
-  <img src="./images/PXL_20250713_231810722_Original.jpg" alt="Field Testing" width="45%"/>
-</div>
+### Live Field Testing
+To validate our research, UmbrellaAgent was deployed in live, real-world conditions. The photograph below captures the system in action during a live event—with the UmbrellaAgent interface actively running on the terminal in the foreground, while the party takes place in the background.
+
+![UmbrellaAgent Live Deployment](./images/PXL_20250713_231810722_Original.jpg)
+*(UmbrellaAgent operating seamlessly in the field without relying on external internet connectivity).*
 
 Our research and subsequent field testing validated several core architectural decisions:
 - **Performance & Scalability:** Through rigorous synthetic stress tests (via Apache JMeter), the WebSocket duplex stream architecture successfully sustained over **1.58M requests** without failure.
