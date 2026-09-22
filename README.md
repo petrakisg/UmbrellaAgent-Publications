@@ -7,6 +7,12 @@ This repository serves as a visual and descriptive showcase of the application d
 
 > **Note:** This repository is dedicated to presenting the application's interface, capabilities, and real-world execution. It does not contain the proprietary source code of the application itself.
 
+## From UmbrellaAgent to Efaeto
+
+The project is evolving into **Efaeto**, a local-first ordering and POS system for hospitality venues. Visit **[efaeto.gr](https://efaeto.gr/)** to explore the product and request a demonstration.
+
+Local ordering continues over the venue's WiFi when the internet connection is unavailable. Online card authorization and provider-based fiscal receipt services require internet connectivity.
+
 ---
 
 ## 📖 The Vision: Why UmbrellaAgent?
